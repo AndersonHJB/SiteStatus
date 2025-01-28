@@ -122,11 +122,11 @@ function getStatusDescriptiveText(color) {
   return color == "nodata"
     ? "No Data Available: Health check was not performed."
     : color == "success"
-    ? "No downtime recorded today."
+    ? "No downtime recorded on this day."
     : color == "failure"
-    ? "Major outages recorded today."
+    ? "Major outages recorded on this day."
     : color == "partial"
-    ? "Partial outages recorded today."
+    ? "Partial outages recorded on this day."
     : "Unknown";
 }
 
@@ -183,10 +183,7 @@ function splitRowsByDate(rows) {
     }
 
     const [dateTimeStr, resultStr] = row.split(",", 2);
-    // Replace '-' with '/' because Safari
-    const dateTime = new Date(
-      Date.parse(dateTimeStr.replaceAll("-", "/") + " GMT")
-    );
+    const dateTime = new Date(Date.parse(dateTimeStr.replace(/-/g, "/") + " GMT"));
     const dateStr = dateTime.toDateString();
 
     let resultArray = dateValues[dateStr];
@@ -250,40 +247,6 @@ async function genAllReports() {
       continue;
     }
 
-    const [cleanUrl] = url.split(" ");
-    if (!cleanUrl) {
-      continue;
-    }
-
-    await genReportLog(
-      document.getElementById("reports"),
-      key,
-      cleanUrl.replaceAll('"', "")
-    );
-  }
-}
-
-async function genIncidentReport() {
-  const response = await fetch(
-    "https://incidents.statsig.workers.dev/contents"
-  );
-  if (response.ok) {
-    const json = await response.json();
-    try {
-      const activeDom = DOMPurify.sanitize(
-        marked.parse(json.active ? json.active : "No active incidents")
-      );
-      const inactiveDom = DOMPurify.sanitize(marked.parse(json.inactive));
-      document.getElementById("activeIncidentReports").innerHTML = activeDom;
-      document.getElementById("pastIncidentReports").innerHTML = inactiveDom;
-
-      if (json.active) {
-        setTimeout(() => {
-          document.getElementById("incidents").scrollIntoView(true);
-        }, 1000);
-      }
-    } catch (e) {
-      console.log(e.message);
-    }
+    await genReportLog(document.getElementById("reports"), key, url);
   }
 }
