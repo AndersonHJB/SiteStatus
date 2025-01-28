@@ -1,12 +1,14 @@
 [![Health Check](../../actions/workflows/health-check.yml/badge.svg)](../../actions/workflows/health-check.yml)
 
-# Statsig 开源状态页面
+# 开源状态页面
 
-我们尝试了许多现有的状态页面工具，并将其作为一个有趣的小项目来构建，目标是使状态页面尽可能简单。
+我尝试了许多现有的状态页面工具，并将其作为一个有趣的小项目来构建，目标是使状态页面尽可能简单。其它现有工具需要依靠第三方或者免费版 API，接着以来开源的状态前端，很可惜这两者我找到的都是捆绑在一起使用的。
+
+我现在能否自己实现一个更简单高效的版本呢？这个开源应运而生～
 
 ## 演示
 
-- https://status.statsig.com
+- https://status.bornforthis.cn
 
 ## 设置说明
 
@@ -15,7 +17,8 @@
 
 ```cfg
 key1=https://example.com
-key2=https://statsig.com
+key2=https://class1v1.com
+AI悦创=https://bornforthis.cn
 ```
 
 3. 更新 `index.html` 文件并修改标题。
