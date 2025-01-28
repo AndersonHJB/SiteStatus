@@ -3,8 +3,8 @@ name: 网站健康检查
 # Controls when the action will run.
 on:
   schedule:
-    # - cron: "30 * * * *"
     - cron: "* * * * *"
+    # - cron: "30 * * * *"
 
 jobs:
   health_check_job:
