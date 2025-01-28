@@ -21,6 +21,11 @@ body {
   text-align: center;
   transition: opacity 0.3s;
 }
+hr {
+  margin: 20px 0;
+  border: 0;
+  border-bottom: solid 1px #ddd;
+}
 h1,
 h2,
 h3,
@@ -131,7 +136,8 @@ footer a {
   text-transform: uppercase;
 }
 
-.reportContainer {
+.reportContainer,
+.incidentsContainer {
   margin: 30px auto;
   width: 100%;
 }
@@ -296,6 +302,14 @@ footer a {
   margin-top: 16px;
 }
 
+.incidentsContainer {
+  background-color: #fafafa;
+}
+
+.incidentReportsHeader {
+  margin-bottom: 30px;
+}
+
 @media screen and (max-width: 800px) {
   .pageContainer {
     padding: 30px 20px;
@@ -321,11 +335,18 @@ footer a {
   }
 
   .statusSquare + .statusSquare {
-    margin-left: 1px;
+    margin-left: 0px;
   }
 
   .statusSquare {
     min-width: 4px;
     width: 100%;
+    max-width: calc(10% - 4.5px);
+  }
+
+  .statusStreamContainer {
+    flex-wrap: wrap;
+    row-gap: 5px;
+    column-gap: 5px;
   }
 }

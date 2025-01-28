@@ -1,9 +1,12 @@
 name: Scheduled Health Check
 
+env:
+  CLIENT_SDK_KEY: ${{ secrets.CLIENT_SDK_KEY }}
+
 # Controls when the action will run.
 on:
   schedule:
-    - cron: "30 * * * *"
+    - cron: "*/5 * * * *"
 
 jobs:
   health_check_job:
@@ -11,6 +14,8 @@ jobs:
     name: Check all sites
     steps:
       - uses: actions/checkout@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run Shell Script
         id: shell_script_run
         run: bash ./health-check.sh

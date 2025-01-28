@@ -1,9 +1,13 @@
-<html>
+<html lang="en">
   <head>
-    <title>Status Page</title>
+    <title>Statsig Status</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" property="description" content="Check the current Statsig health status and view past incidents." />
+    <link rel="canonical" href="https://status.statsig.com/">
     <link rel="stylesheet" href="index.css" />
     <script src="index.js"></script>
+    <script async src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script async src="https://cdn.jsdelivr.net/npm/dompurify@2.3.5/dist/purify.min.js"></script>
   </head>
   <body>
     <div class="pageContainer">
@@ -12,6 +16,22 @@
         <span> System Status </span>
       </div>
       <div id="reports" class="reportContainer"></div>
+      <div id="incidents" class="incidentsContainer">
+        <div class="statusContainer">
+          <div class="statusHeader">
+            <h3 class="incidentReportsHeader">Incident Reports</h3>
+          </div>
+          <h4>Active Reports</h4>
+          <div id="activeIncidentReports">
+            Loading...
+          </div>
+          <hr />
+          <h4>Past Reports</h4>
+          <div id="pastIncidentReports">
+            Loading...
+          </div>
+        </div>
+      </div>
       <div id="tooltip" class="tooltip" style="opacity: 0">
         <div id="tooltipArrow" class="tooltipArrow"></div>
         <div id="tooltipDateTime" class="tooltipDateTime"></div>
@@ -43,13 +63,21 @@
       </div>
     </div>
     <footer>
+      This is an 
+      <a href="https://github.com/statsig-io/statsigstatus/"
+        >Open-Source GitHub Page</a
+      >.
+      <br>
       Forked from
       <a href="https://github.com/statsig-io/statuspage/"
-        >Statsig's Open-Source Status Page</a
+        >Statsig's Status Page Template</a
       >.
     </footer>
   </body>
   <script>
     genAllReports();
+    window.addEventListener('load', () => {
+      genIncidentReport();
+    });
   </script>
 </html>
