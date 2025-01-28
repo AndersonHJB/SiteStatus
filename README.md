@@ -1,6 +1,6 @@
 [![Health Check](../../actions/workflows/health-check.yml/badge.svg)](../../actions/workflows/health-check.yml)
 
-# 开源状态页面
+# 背景
 
 我尝试了许多现有的状态页面工具，并将其作为一个有趣的小项目来构建，目标是使状态页面尽可能简单。其它现有工具需要依靠第三方或者免费版 API，接着以来开源的状态前端，很可惜这两者我找到的都是捆绑在一起使用的。
 
