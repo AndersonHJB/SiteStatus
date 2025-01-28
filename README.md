@@ -1,50 +1,44 @@
 [![Health Check](../../actions/workflows/health-check.yml/badge.svg)](../../actions/workflows/health-check.yml)
 
-# Statsig's Open-Source Status Page
+# Statsig 开源状态页面
 
-We tried various Status Pages out there, and built this as a fun little hobby project to make status pages as simple as possible.
+我们尝试了许多现有的状态页面工具，并将其作为一个有趣的小项目来构建，目标是使状态页面尽可能简单。
 
-## Demo
+## 演示
 
 - https://status.statsig.com
 
-## Setup instructions
+## 设置说明
 
-1. Fork the [template repository](https://github.com/statsig-io/statuspage/).
-2. Update `urls.cfg` to include your urls.
+1. Fork [模板仓库](https://github.com/AndersonHJB/site_status)。
+2. 更新 `urls.cfg` 文件以包含您的网址。
 
 ```cfg
 key1=https://example.com
 key2=https://statsig.com
 ```
 
-3. Update `index.html` and change the title.
+3. 更新 `index.html` 文件并修改标题。
 
 ```html
-<title>My Status Page</title>
-<h1>Services Status</h1>
+<title>我的状态页面</title>
+<h1>服务状态</h1>
 ```
 
-4. Set up GitHub Pages for your repository.
+4. 为您的仓库设置 GitHub Pages。
 
 ![image](https://user-images.githubusercontent.com/74588208/121419015-5f4dc200-c920-11eb-9b14-a275ef5e2a19.png)
 
-## How does it work?
+## 它如何工作？
 
-This project uses GitHub actions to wake up every hour and run a shell script (`health-check.sh`). This script runs `curl` on every url in your config and appends the result of that run to a log file and commits it to the repository. This log is then pulled dynamically from `index.html` and displayed in a easily consumable fashion. You can also run that script from your own infrastructure to update the status page more often.
+此项目使用 GitHub Actions 每小时运行一次 shell 脚本 (`health-check.sh`)。该脚本通过 `curl` 检查配置文件中的每个 URL 的状态，将运行结果附加到日志文件中并提交到仓库中。然后，这些日志会动态从 `index.html` 中加载，并以易于消费的方式显示。您还可以从自己的基础设施运行此脚本，以更频繁地更新状态页面。
 
-## What does it not do (yet)?
+## 它目前不支持哪些功能？
 
-1. Incident management.
-2. Outage duration tracking.
-3. Updating status root-cause.
+1. 事件管理。
+2. 中断持续时间跟踪。
+3. 状态根本原因更新。
 
-## Got new ideas?
+## 有新想法？
 
-Send in a PR - we'd love to integrate your ideas.
-
-## In case...
-
-You are looking for a developer friendly Feature flags, and A/B experimentation service for your product, check out: https://www.statsig.com
-
-![Statsig status page](https://user-images.githubusercontent.com/74588208/146078161-778fcb99-4a59-4e39-9fc0-abef18d5ac52.png)
+提交 PR 吧！我很乐意集成您的想法。
