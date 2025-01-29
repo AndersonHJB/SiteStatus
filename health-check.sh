@@ -17,10 +17,12 @@ urlsConfig="./urls.cfg"
 echo "Reading $urlsConfig"
 while read -r line
 do
+  # 跳过空行或无效行
+  [[ -z "$line" || "$line" =~ ^# ]] && continue
   echo "  $line"
   IFS='=' read -ra TOKENS <<< "$line"
-  KEYSARRAY+=(${TOKENS[0]})
-  URLSARRAY+=(${TOKENS[1]})
+  KEYSARRAY+=("${TOKENS[0]}")
+  URLSARRAY+=("${TOKENS[1]}")
 done < "$urlsConfig"
 
 echo "***********************"
@@ -28,15 +30,20 @@ echo "Starting health checks with ${#KEYSARRAY[@]} configs:"
 
 mkdir -p logs
 
-for (( index=0; index < ${#KEYSARRAY[@]}; index++))
+# 如果 report.json 不存在，则初始化一个空的 JSON 对象
+if [ ! -f "logs/report.json" ]; then
+  echo "{}" > "logs/report.json"
+fi
+
+for (( index=0; index < ${#KEYSARRAY[@]}; index++ ))
 do
   key="${KEYSARRAY[index]}"
   url="${URLSARRAY[index]}"
   echo "  $key=$url"
 
-  for i in 1 2 3 4; 
-  do
-    response=$(curl --write-out '%{http_code}' --silent --output /dev/null $url)
+  # 尝试多次请求，直到成功或次数用完
+  for i in 1 2 3 4; do
+    response=$(curl --write-out '%{http_code}' --silent --output /dev/null "$url")
     if [ "$response" -eq 200 ] || [ "$response" -eq 202 ] || [ "$response" -eq 301 ] || [ "$response" -eq 302 ] || [ "$response" -eq 307 ]; then
       result="success"
     else
@@ -47,12 +54,25 @@ do
     fi
     sleep 5
   done
+
   dateTime=$(date +'%Y-%m-%d %H:%M')
   if [[ $commit == true ]]
   then
-    echo $dateTime, $result >> "logs/${key}_report.log"
-    # By default we keep 2000 last log entries.  Feel free to modify this to meet your needs.
-    echo "$(tail -2000 logs/${key}_report.log)" > "logs/${key}_report.log"
+    # 利用 jq 往 report.json 里插入数据
+    # 1. 将当前 JSON 读取到内存
+    # 2. 往对应 key 的数组中添加 {dateTime, result}
+    # 3. 只保留数组的最后 2000 条记录
+    updatedJson=$(jq --arg k "$key" --arg dt "$dateTime" --arg r "$result" '
+      # 如果不存在该 key，就先初始化为空数组
+      .[$k] |= ( . // [] ) |
+      # 将新的记录加入
+      .[$k] += [{"dateTime": $dt, "result": $r}] |
+      # 只保留最后 2000 条
+      .[$k] |= ( if length > 2000 then .[-2000:] else . end )
+    ' logs/report.json)
+
+    # 写回文件
+    echo "$updatedJson" > logs/report.json
   else
     echo "    $dateTime, $result"
   fi
