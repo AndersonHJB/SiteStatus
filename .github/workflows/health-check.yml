@@ -4,7 +4,6 @@ name: 网站健康检查
 on:
   schedule:
     - cron: "* * * * *"
-    # - cron: "30 * * * *"
 
 jobs:
   health_check_job:
