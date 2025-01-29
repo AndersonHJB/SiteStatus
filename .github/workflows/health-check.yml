@@ -1,9 +1,9 @@
 name: 网站健康检查
 
-# Controls when the action will run.
 on:
   schedule:
-    - cron: "*/1 * * * *"
+    - cron: "*/1 * * * *"  # 每分钟运行一次
+  workflow_dispatch:  # 添加这个以支持手动触发
 
 jobs:
   health_check_job:
