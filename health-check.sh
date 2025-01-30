@@ -4,11 +4,11 @@
 # later upstream merges messy for anyone who forked us.
 # 是否需要自动提交日志
 commit=true
-origin=$(git remote get-url origin)
-if [[ $origin == *AndersonHJB/site_status* ]]
-then
-  commit=false
-fi
+# origin=$(git remote get-url origin)
+# if [[ $origin == *AndersonHJB/site_status* ]]
+# then
+#   commit=false
+# fi
 
 KEYSARRAY=()
 URLSARRAY=()
