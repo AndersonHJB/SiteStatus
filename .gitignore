@@ -2,3 +2,5 @@ logs
 logs/*.log
 .DS_Store
 report.json
+logs/report.json
+logs/*.json
