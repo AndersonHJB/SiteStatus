@@ -14,6 +14,12 @@ KEYSARRAY=()
 URLSARRAY=()
 
 urlsConfig="./urls.cfg"
+
+# 确保 urls.cfg 末尾有换行符
+if [[ -f "$urlsConfig" && -n $(tail -c1 "$urlsConfig") ]]; then
+  echo "" >> "$urlsConfig"
+fi
+
 echo "Reading $urlsConfig"
 while read -r line
 do
