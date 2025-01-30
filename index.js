@@ -1,8 +1,7 @@
 const maxDays = 30;
 
 /**
- * 该函数不再去 fetch("logs/" + key + "_report.log")， 
- * 而是 fetch("logs/report.json") 并在其中找到对应 key 的数据。
+ * 该函数从 allData 中获取指定 key 的数据，转为文本形式后再进行可视化。
  */
 async function genReportLog(container, key, url, allData) {
   // 从 allData 中获取当前 key 对应的对象
@@ -17,7 +16,6 @@ async function genReportLog(container, key, url, allData) {
   container.appendChild(statusStream);
 }
 
-// 这里保留原先逻辑
 function constructStatusStream(key, url, uptimeData) {
   let streamContainer = templatize("statusStreamContainerTemplate");
   for (var ii = maxDays - 1; ii >= 0; ii--) {
@@ -147,7 +145,6 @@ function create(tag, className) {
 }
 
 /**
- * 原本是将文本日志转为每日聚合统计，现在我们仍然重用它的逻辑：
  * 给定 "dateTime, result" 的多行字符串，通过同样方式做可视化。
  */
 function normalizeData(statusLines) {
@@ -188,6 +185,7 @@ function splitRowsByDate(rows) {
       continue;
     }
     const [dateTimeStr, resultStr] = row.split(",", 2);
+    // 替换 - 为 / 并在末尾加 GMT，使 Date 解析更可靠
     const dateTime = new Date(Date.parse(dateTimeStr.replace(/-/g, "/") + " GMT"));
     const dateStr = dateTime.toDateString();
 
@@ -239,14 +237,9 @@ function hideTooltip() {
 }
 
 /**
- * 改为一次性读取 report.json，然后对每一行 urls.cfg 里的站点调用 genReportLog
+ * 改为一次性读取 report.json，然后对其中所有 key 进行渲染。
  */
 async function genAllReports() {
-  // 读取 urls.cfg
-  const responseCfg = await fetch("urls.cfg");
-  const configText = await responseCfg.text();
-  const configLines = configText.split("\n");
-
   // 读取 report.json（所有站点的日志）
   const responseLog = await fetch("logs/report.json");
   let allData = {};
@@ -254,15 +247,9 @@ async function genAllReports() {
     allData = await responseLog.json();
   }
 
-  for (let ii = 0; ii < configLines.length; ii++) {
-    const configLine = configLines[ii].trim();
-    if (!configLine || configLine.startsWith("#")) {
-      continue;
-    }
-    const [key, url] = configLine.split("=");
-    if (!key || !url) {
-      continue;
-    }
+  // 遍历 allData 中的所有站点
+  for (const [key, siteData] of Object.entries(allData)) {
+    const url = siteData.url || "";
     await genReportLog(document.getElementById("reports"), key, url, allData);
   }
 }
