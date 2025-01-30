@@ -45,6 +45,7 @@ do
   for i in 1 2 3 4; do
     response=$(curl --write-out '%{http_code}' --silent --output /dev/null "$url")
     if [ "$response" -eq 200 ] || [ "$response" -eq 202 ] || [ "$response" -eq 301 ] || [ "$response" -eq 302 ] || [ "$response" -eq 307 ]; then
+    # if [[ "$response" =~ ^(200|202|301|302|307)$ ]]; then
       result="success"
     else
       result="failed"
@@ -62,13 +63,13 @@ do
     # 1. 将当前 JSON 读取到内存
     # 2. 往对应 key 的数组中添加 {dateTime, result}
     # 3. 只保留数组的最后 2000 条记录
-    updatedJson=$(jq --arg k "$key" --arg dt "$dateTime" --arg r "$result" '
+    updatedJson=$(jq --arg k "$key" --arg u "$url" --arg dt "$dateTime" --arg r "$result" '
       # 如果不存在该 key，就先初始化为空数组
-      .[$k] |= ( . // [] ) |
+      .[$k] |= ( . // {"url": $u, "checks": []} ) |
       # 将新的记录加入
-      .[$k] += [{"dateTime": $dt, "result": $r}] |
+      .[$k].checks += [{"dateTime": $dt, "result": $r}] |
       # 只保留最后 2000 条
-      .[$k] |= ( if length > 2000 then .[-2000:] else . end )
+      .[$k].checks |= ( if length > 2000 then .[-2000:] else . end )
     ' logs/report.json)
 
     # 写回文件
