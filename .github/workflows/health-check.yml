@@ -16,5 +16,5 @@ jobs:
         run: bash ./health-check.sh
       - name: Check jq version
         run: jq --version      
-      - name: Debug Logs
-        run: ls -lah logs/ && cat logs/report.json
+      # - name: Debug Logs  # 调试日志/自行选择是否启用
+      #   run: ls -lah logs/ && cat logs/report.json
