@@ -5,7 +5,7 @@
 # 是否需要自动提交日志
 commit=true
 # origin=$(git remote get-url origin)
-# if [[ $origin == *AndersonHJB/site_status* ]]
+# if [[ $origin == *AndersonHJB/SiteStatus* ]]
 # then
 #   commit=false
 # fi
