@@ -63,8 +63,11 @@ do
     # 2. 往对应 key 的数组中添加 {dateTime, result}
     # 3. 只保留数组的最后 2000 条记录
     updatedJson=$(jq --arg k "$key" --arg dt "$dateTime" --arg r "$result" '
+      # 如果不存在该 key，就先初始化为空数组
       .[$k] |= ( . // [] ) |
+      # 将新的记录加入
       .[$k] += [{"dateTime": $dt, "result": $r}] |
+      # 只保留最后 2000 条
       .[$k] |= ( if length > 2000 then .[-2000:] else . end )
     ' logs/report.json)
 
