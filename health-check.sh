@@ -58,19 +58,17 @@ do
   dateTime=$(date +'%Y-%m-%d %H:%M')
   if [[ $commit == true ]]
   then
-    # 利用 jq 往 report.json 里插入数据，现在包含 URL 信息
+    # 利用 jq 往 report.json 里插入数据
     # 1. 将当前 JSON 读取到内存
-    # 2. 往对应 key 的对象中设置 url 和 records 数组
+    # 2. 往对应 key 的数组中添加 {dateTime, result}
     # 3. 只保留数组的最后 2000 条记录
-    updatedJson=$(jq --arg k "$key" --arg dt "$dateTime" --arg r "$result" --arg u "$url" '
-      # 如果不存在该 key，就先初始化对象结构
-      .[$k] |= ( . // {"url": $u, "records": []} ) |
-      # 确保 URL 是最新的
-      .[$k].url = $u |
+    updatedJson=$(jq --arg k "$key" --arg dt "$dateTime" --arg r "$result" '
+      # 如果不存在该 key，就先初始化为空数组
+      .[$k] |= ( . // [] ) |
       # 将新的记录加入
-      .[$k].records += [{"dateTime": $dt, "result": $r}] |
+      .[$k] += [{"dateTime": $dt, "result": $r}] |
       # 只保留最后 2000 条
-      .[$k].records |= ( if length > 2000 then .[-2000:] else . end )
+      .[$k] |= ( if length > 2000 then .[-2000:] else . end )
     ' logs/report.json)
 
     # 写回文件
