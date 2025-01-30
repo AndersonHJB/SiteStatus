@@ -14,3 +14,5 @@ jobs:
       - name: Run Shell Script
         id: shell_script_run
         run: bash ./health-check.sh
+      - name: Debug Logs
+        run: ls -lah logs/ && cat logs/report.json
