@@ -19,8 +19,9 @@ while read -r line
 do
   # 跳过空行或无效行
   [[ -z "$line" || "$line" =~ ^# ]] && continue
-  echo "  $line"
+  echo "Reading: $line" # 调试输出
   IFS='=' read -ra TOKENS <<< "$line"
+  echo "Key: ${TOKENS[0]}, URL: ${TOKENS[1]}" # 确保解析正确
   KEYSARRAY+=("${TOKENS[0]}")
   URLSARRAY+=("${TOKENS[1]}")
 done < "$urlsConfig"
