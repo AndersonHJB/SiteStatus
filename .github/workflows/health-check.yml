@@ -14,7 +14,7 @@ jobs:
       - name: Run Shell Script
         id: shell_script_run
         run: bash ./health-check.sh
-      - name: Check jq version
-        run: jq --version      
+      # - name: Check jq version  # 检查 jq 版本
+      #   run: jq --version   # jq 是一个命令行 JSON 处理工具   
       # - name: Debug Logs  # 调试日志/自行选择是否启用
       #   run: ls -lah logs/ && cat logs/report.json
