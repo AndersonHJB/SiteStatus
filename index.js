@@ -5,15 +5,15 @@ const maxDays = 30;
  * 而是 fetch("logs/report.json") 并在其中找到对应 key 的数据。
  */
 async function genReportLog(container, key, url, allData) {
-  // 从 allData 中获取当前 key 对应的数组
-  let siteData = allData[key] || [];
+  // 从 allData 中获取当前 key 对应的对象
+  let siteData = allData[key] || { url: url, records: [] };
   // 将其转换为原先的 "dateTime, result" 的文本形式
-  let statusLines = siteData
+  let statusLines = siteData.records
     .map((entry) => `${entry.dateTime}, ${entry.result}`)
     .join("\n");
 
   const normalized = normalizeData(statusLines);
-  const statusStream = constructStatusStream(key, url, normalized);
+  const statusStream = constructStatusStream(key, siteData.url, normalized);
   container.appendChild(statusStream);
 }
 
