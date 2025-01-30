@@ -77,6 +77,10 @@
       {
         "dateTime": "2025-01-30 06:48",
         "result": "success"
+      },
+      {
+        "dateTime": "2025-01-30 06:57",
+        "result": "success"
       }
     ]
   },
@@ -157,6 +161,10 @@
       },
       {
         "dateTime": "2025-01-30 06:48",
+        "result": "success"
+      },
+      {
+        "dateTime": "2025-01-30 06:57",
         "result": "success"
       }
     ]
@@ -239,6 +247,10 @@
       {
         "dateTime": "2025-01-30 06:48",
         "result": "success"
+      },
+      {
+        "dateTime": "2025-01-30 06:57",
+        "result": "success"
       }
     ]
   },
@@ -319,6 +331,10 @@
       },
       {
         "dateTime": "2025-01-30 06:48",
+        "result": "success"
+      },
+      {
+        "dateTime": "2025-01-30 06:57",
         "result": "success"
       }
     ]
@@ -401,6 +417,10 @@
       {
         "dateTime": "2025-01-30 06:48",
         "result": "success"
+      },
+      {
+        "dateTime": "2025-01-30 06:57",
+        "result": "success"
       }
     ]
   },
@@ -482,6 +502,19 @@
       {
         "dateTime": "2025-01-30 06:48",
         "result": "success"
+      },
+      {
+        "dateTime": "2025-01-30 06:57",
+        "result": "success"
+      }
+    ]
+  },
+  "测试网站2": {
+    "url": "https://blog2.bornforthis.cn",
+    "records": [
+      {
+        "dateTime": "2025-01-30 06:57",
+        "result": "failed"
       }
     ]
   }
