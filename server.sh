@@ -1,12 +1,23 @@
+# Server Version - health-check-server.sh
 #!/usr/bin/env bash
 
-# Exit on error
-set -e
+# ========== 配置区域 ==========
+# 时区设置 (例如: Asia/Shanghai)
+export TZ="Asia/Shanghai"
+
+# 存储配置
+MAX_RECORDS=2000          # 每个URL保留的最大记录数
+RETRY_ATTEMPTS=4          # 失败重试次数
+RETRY_DELAY=5            # 重试间隔(秒)
+CURL_TIMEOUT=30          # curl超时时间(秒)
+
+# 成功的HTTP状态码
+SUCCESS_CODES=(200 201 202 301 302 307)
 
 # Script directory
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Configuration
+# 文件路径配置
 urlsConfig="${SCRIPT_DIR}/urls.cfg"
 logsDir="${SCRIPT_DIR}/logs"
 reportFile="${logsDir}/report.json"
@@ -64,33 +75,34 @@ for (( index=0; index < ${#KEYSARRAY[@]}; index++ )); do
     # Initialize result as failed
     result="failed"
     
-    # Try up to 4 times
-    for attempt in {1..4}; do
-        echo "Attempt $attempt of 4"
+    # Multiple retry attempts
+    for (( i=1; i<=RETRY_ATTEMPTS; i++ )); do
+        echo "Attempt $i of $RETRY_ATTEMPTS"
         
-        # Use timeout to prevent hanging
-        if response=$(curl --max-time 30 --write-out '%{http_code}' --silent --output /dev/null "$url"); then
-            if [[ "$response" =~ ^(200|201|202|301|302|307)$ ]]; then
-                result="success"
-                break
-            fi
+        if response=$(curl --max-time $CURL_TIMEOUT --write-out '%{http_code}' --silent --output /dev/null "$url"); then
+            for code in "${SUCCESS_CODES[@]}"; do
+                if [ "$response" -eq "$code" ]; then
+                    result="success"
+                    break 2
+                fi
+            done
         fi
         
-        # Wait before retry
-        [[ $attempt -lt 4 ]] && sleep 5
+        [ $i -lt $RETRY_ATTEMPTS ] && sleep $RETRY_DELAY
     done
 
-    dateTime=$(date -u +'%Y-%m-%d %H:%M UTC')
+    dateTime=$(date +'%Y-%m-%d %H:%M')
     
     # Update JSON report
     if ! updatedJson=$(jq --arg k "$key" \
                         --arg dt "$dateTime" \
                         --arg r "$result" \
-                        --arg u "$url" '
+                        --arg u "$url" \
+                        --argjson max "$MAX_RECORDS" '
         .[$k] |= ( . // {"url": $u, "records": []} ) |
         .[$k].url = $u |
         .[$k].records += [{"dateTime": $dt, "result": $r}] |
-        .[$k].records |= ( if length > 2000 then .[-2000:] else . end )
+        .[$k].records |= ( if length > $max then .[-($max):] else . end )
         ' "$reportFile"); then
         echo "Error: JSON update failed for $key"
         continue
