@@ -1,81 +1,103 @@
 #!/usr/bin/env bash
 
-# 1. 配置区
-LOG_DIR="logs"           # 日志目录
-CONFIG_FILE="urls.cfg"   # 配置文件
-MAX_LOG_ENTRIES=2000     # 每个站点在 JSON 中最多保留多少条记录
+# Exit on error
+set -e
 
-# 2. 确保日志目录存在
-mkdir -p "$LOG_DIR"
+# Script directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# 如果 report.json 不存在，就创建一个空的 JSON 对象“{}”
-REPORT_FILE="$LOG_DIR/report.json"
-if [ ! -f "$REPORT_FILE" ]; then
-  echo "{}" > "$REPORT_FILE"
-fi
+# Configuration
+urlsConfig="${SCRIPT_DIR}/urls.cfg"
+logsDir="${SCRIPT_DIR}/logs"
+reportFile="${logsDir}/report.json"
 
-# 3. 读取配置文件
+# Check required commands
+for cmd in curl jq; do
+    if ! command -v $cmd &> /dev/null; then
+        echo "Error: $cmd is required but not installed."
+        exit 1
+    fi
+done
+
+# Create arrays for storing URLs and keys
 KEYSARRAY=()
 URLSARRAY=()
 
-echo "Reading $CONFIG_FILE"
-while read -r line
-do
-    # 跳过空行和注释行
+# Ensure logs directory exists
+mkdir -p "$logsDir"
+
+# Initialize report.json if it doesn't exist
+if [ ! -f "$reportFile" ]; then
+    echo "{}" > "$reportFile"
+fi
+
+# Ensure urls.cfg ends with newline
+if [[ -f "$urlsConfig" && -n $(tail -c1 "$urlsConfig") ]]; then
+    echo "" >> "$urlsConfig"
+fi
+
+# Read configuration
+echo "Reading $urlsConfig"
+while IFS= read -r line; do
+    # Skip empty lines and comments
     [[ -z "$line" || "$line" =~ ^[[:space:]]*# ]] && continue
     
-    echo "  $line"
-    IFS='=' read -ra TOKENS <<< "$line"
-    KEYSARRAY+=("${TOKENS[0]}")
-    URLSARRAY+=("${TOKENS[1]}")
-done < "$CONFIG_FILE"
+    # Parse key-value pairs
+    if [[ "$line" =~ ^([^=]+)=(.+)$ ]]; then
+        key="${BASH_REMATCH[1]}"
+        url="${BASH_REMATCH[2]}"
+        KEYSARRAY+=("$key")
+        URLSARRAY+=("$url")
+        echo "Loaded: $key = $url"
+    fi
+done < "$urlsConfig"
 
 echo "***********************"
-echo "Starting health checks with ${#KEYSARRAY[@]} configs:"
+echo "Starting health checks with ${#KEYSARRAY[@]} configs"
 
-# 4. 执行健康检查并写入 JSON
-for (( index=0; index < ${#KEYSARRAY[@]}; index++ ))
-do
+# Check each URL
+for (( index=0; index < ${#KEYSARRAY[@]}; index++ )); do
     key="${KEYSARRAY[index]}"
     url="${URLSARRAY[index]}"
-    echo "Checking $key=$url"
-    
-    # 尝试4次
-    result="failed"
-    for i in 1 2 3 4; do
-        response=$(curl --write-out '%{http_code}' --silent --output /dev/null "$url")
-        if [[ "$response" =~ ^(200|202|301|302|307)$ ]]; then
-            result="success"
-            break
-        fi
-        # 如果失败则等待5秒后重试
-        [ "$i" -lt 4 ] && sleep 5
-    done
-    
-    # 记录结果
-    dateTime=$(date +'%Y-%m-%d %H:%M')
+    echo "Checking $key = $url"
 
-    # 用 jq 往同一个 report.json 里追加记录
-    #  - 如果 key 对应的数组不存在，则先初始化为空数组 []
-    #  - 向数组中追加一条新纪录
-    #  - 若数组长度超过 MAX_LOG_ENTRIES，则仅保留后 MAX_LOG_ENTRIES 条
-    updatedJson=$(
-      jq --arg k "$key" \
-         --arg dt "$dateTime" \
-         --arg r "$result" \
-         --argjson max "$MAX_LOG_ENTRIES" \
-         '
-          .[$k] |= ( . // [] )            # 若不存在该key, 则初始化
-          | .[$k] += [{"dateTime": $dt, "result": $r}]
-          | .[$k] |= ( if length > $max then .[-$max:] else . end )
-         ' "$REPORT_FILE"
-    )
-    echo "$updatedJson" > "$REPORT_FILE"
+    # Initialize result as failed
+    result="failed"
     
-    # 输出到控制台
-    echo "  $dateTime - $key - $result"
+    # Try up to 4 times
+    for attempt in {1..4}; do
+        echo "Attempt $attempt of 4"
+        
+        # Use timeout to prevent hanging
+        if response=$(curl --max-time 30 --write-out '%{http_code}' --silent --output /dev/null "$url"); then
+            if [[ "$response" =~ ^(200|201|202|301|302|307)$ ]]; then
+                result="success"
+                break
+            fi
+        fi
+        
+        # Wait before retry
+        [[ $attempt -lt 4 ]] && sleep 5
+    done
+
+    dateTime=$(date -u +'%Y-%m-%d %H:%M UTC')
+    
+    # Update JSON report
+    if ! updatedJson=$(jq --arg k "$key" \
+                        --arg dt "$dateTime" \
+                        --arg r "$result" \
+                        --arg u "$url" '
+        .[$k] |= ( . // {"url": $u, "records": []} ) |
+        .[$k].url = $u |
+        .[$k].records += [{"dateTime": $dt, "result": $r}] |
+        .[$k].records |= ( if length > 2000 then .[-2000:] else . end )
+        ' "$reportFile"); then
+        echo "Error: JSON update failed for $key"
+        continue
+    fi
+    
+    echo "$updatedJson" > "$reportFile"
+    echo "  $dateTime: $result"
 done
 
-# 5. 可选：记录脚本执行完成（如果还需要此记录）
-dateTimeEnd=$(date +'%Y-%m-%d %H:%M')
-echo "$dateTimeEnd - Health check completed" >> "$LOG_DIR/health_check.log"
+echo "Health check completed successfully"
