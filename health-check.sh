@@ -67,6 +67,7 @@ do
 
   # 多次重试
   for (( i=1; i<=RETRY_ATTEMPTS; i++ )); do
+    echo "Attempt $i of $RETRY_ATTEMPTS"
     response=$(curl --max-time $CURL_TIMEOUT --write-out '%{http_code}' --silent --output /dev/null "$url")
     result="failed"
     for code in "${SUCCESS_CODES[@]}"; do
