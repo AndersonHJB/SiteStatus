@@ -18,7 +18,7 @@ SUCCESS_CODES=(200 201 202 301 302 307)
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # 文件路径配置
-urlsConfig="${SCRIPT_DIR}/urls.cfg"
+urlsConfig="../urls.cfg"
 logsDir="${SCRIPT_DIR}/logs"
 reportFile="${logsDir}/report.json"
 
