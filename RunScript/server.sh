@@ -19,7 +19,7 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # 文件路径配置
 urlsConfig="../urls.cfg"
-logsDir="${SCRIPT_DIR}/logs"
+logsDir="../logs"
 reportFile="${logsDir}/report.json"
 
 # Check required commands
