@@ -22,11 +22,11 @@ SUCCESS_CODES=(200 201 202 301 302 307)
 # later upstream merges messy for anyone who forked us.
 # 是否需要自动提交日志
 commit=true
-origin=$(git remote get-url origin)
-if [[ $origin == *AndersonHJB/SiteStatus* ]]
-then
-  commit=false
-fi
+# origin=$(git remote get-url origin)
+# if [[ $origin == *AndersonHJB/SiteStatus* ]]
+# then
+#   commit=false
+# fi
 
 KEYSARRAY=()
 URLSARRAY=()
