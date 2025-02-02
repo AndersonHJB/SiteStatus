@@ -32,6 +32,11 @@ AI悦创=https://bornforthis.cn
 
 ![image](https://user-images.githubusercontent.com/74588208/121419015-5f4dc200-c920-11eb-9b14-a275ef5e2a19.png)
 
+## 脚本说明
+
+- [health-check.sh](./RunScript/health-check.sh)：Github Action 运行脚本
+- [server.sh](./RunScript/server.sh)：服务器运行脚本
+
 ## 它如何工作？
 
 此项目使用 GitHub Actions 每小时运行一次 shell 脚本 (`health-check.sh`)。该脚本通过 `curl` 检查配置文件中的每个 URL 的状态，将运行结果附加到日志文件中并提交到仓库中。然后，这些日志会动态从 `index.html` 中加载，并以易于消费的方式显示。您还可以从自己的基础设施运行此脚本，以更频繁地更新状态页面。
